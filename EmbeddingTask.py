@@ -13,14 +13,14 @@ class EmbeddingUtil:
         self.model = model
         self.dictionary = dictionary
 
-    def getEmbedding(self):
+    def get_embedding(self):
         if self.model == 'bert':
-            return getBertEmbedding(self.sentence)
+            return get_bert_embedding(self.sentence)
         if self.model == 'bow':
-            return getBowEmbedding(self.sentence, self.dictionary)
+            return get_bow_embedding(self.sentence, self.dictionary)
 
 
-def getBertEmbedding(sentence):
+def get_bert_embedding(sentence):
     # Load pre-trained model tokenizer (vocabulary)
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     marked_text = "[CLS] " + sentence + " [SEP]"
@@ -60,7 +60,7 @@ def getBertEmbedding(sentence):
     return sentence_embedding.numpy()
 
 
-def getBowEmbedding(sentence, dictionary):
+def get_bow_embedding(sentence, dictionary):
     item_infomation_matrix = numpy.zeros(len(dictionary))
     for word in sentence:
         item_infomation_matrix[list(dictionary.keys()).index(word)] = 1
