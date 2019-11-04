@@ -4,6 +4,8 @@ import collections
 
 from EmbeddingTask import EmbeddingUtil
 from CosineSimilarityTask import CosineSimilarityTask
+from autoencoder import AutoEncoder
+import matplotlib.pyplot as plt
 
 
 def list_to_string(list_item):
@@ -53,15 +55,32 @@ except FileNotFoundError as e:
 
     np.save('data/item_information_matrix.npy', item_information_matrix)
 
+# **** AutoEncoder ****
+ae = AutoEncoder(item_information_matrix, validation_perc=0.1, lr=1e-3, intermediate_size=5000, encoded_size=100)
+ae.train_loop(epochs=30)
 
-try:
-    item_similarity_score = np.load('data/item_similarity_score.npy')
-except FileNotFoundError as e:
-    print("Generate item_similarity_score file")
-    item_similarity_score = CosineSimilarityTask(item_information_matrix).get_similarity_scores()
-    np.save('data/item_similarity_score.npy', item_information_matrix)
+losses = pd.DataFrame(data=list(zip(ae.train_losses, ae.val_losses)), columns=['train_loss', 'validation_loss'])
+losses['epoch'] = (losses.index + 1) / 3
 
-item_similarity_df = pd.DataFrame(item_similarity_score.toarray(), index=tags.index.tolist())
-print(item_similarity_df)
+fig, ax = plt.subplots()
+ax.plot(losses['epoch'], losses['train_loss'])
+ax.plot(losses['epoch'], losses['validation_loss'])
+ax.set_ylabel('MSE loss')
+ax.set_xlabel('epoch')
+ax.set_title('autoencoder loss over time')
+ax.legend()
+
+encoded_item_matrix = ae.get_encoded_representations()
+print(encoded_item_matrix.shape())
+#
+# try:
+#     item_similarity_score = np.load('data/item_similarity_score.npy')
+# except FileNotFoundError as e:
+#     print("Generate item_similarity_score file")
+#     item_similarity_score = CosineSimilarityTask(item_information_matrix).get_similarity_scores()
+#     np.save('data/item_similarity_score.npy', item_information_matrix)
+#
+# item_similarity_df = pd.DataFrame(item_similarity_score.toarray(), index=tags.index.tolist())
+# print(item_similarity_df)
 
 
