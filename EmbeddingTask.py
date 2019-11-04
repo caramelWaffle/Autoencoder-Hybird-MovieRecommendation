@@ -1,18 +1,23 @@
 import torch
+import numpy
 from pytorch_pretrained_bert import BertTokenizer, BertModel, BertForMaskedLM
 
 
 class EmbeddingUtil:
     sentence = ""
     model = "word2vec"
+    dictionary = {}
 
-    def __init__(self, sentence, model):
+    def __init__(self, sentence, model, dictionary):
         self.sentence = sentence
         self.model = model
+        self.dictionary = dictionary
 
     def getEmbedding(self):
         if self.model == 'bert':
             return getBertEmbedding(self.sentence)
+        if self.model == 'bow':
+            return getBowEmbedding(self.sentence, self.dictionary)
 
 
 def getBertEmbedding(sentence):
@@ -53,3 +58,10 @@ def getBertEmbedding(sentence):
 
     sentence_embedding = torch.mean(encoded_layers[11], 1)
     return sentence_embedding.numpy()
+
+
+def getBowEmbedding(sentence, dictionary):
+    item_infomation_matrix = numpy.zeros(len(dictionary))
+    for word in sentence:
+        item_infomation_matrix[list(dictionary.keys()).index(word)] = 1
+    return item_infomation_matrix
