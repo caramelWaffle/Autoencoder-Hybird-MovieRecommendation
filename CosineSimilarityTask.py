@@ -1,7 +1,6 @@
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import time
-import progressbar
 from tqdm import tqdm
 
 

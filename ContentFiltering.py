@@ -1,16 +1,18 @@
 import pandas as pd
 import numpy as np
 import collections
-
+import nltk
+import matplotlib.pyplot as plt
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from nltk.stem import PorterStemmer
 from EmbeddingTask import EmbeddingUtil
 from CosineSimilarityTask import CosineSimilarityTask
 from autoencoder import AutoEncoder
-import matplotlib.pyplot as plt
 
 
 def list_to_string(list_item):
     return ' '.join(map(str, list_item)).lower()
-
 
 movies = pd.read_csv("data/movies.csv", encoding='utf-8')
 ratings = pd.read_csv("data/ratings.csv", encoding='utf-8')
@@ -27,14 +29,24 @@ for index, row in tags.iterrows():
 
 dictionary = {}
 movie_index_link = list()
+lemmatizer = WordNetLemmatizer()
+stemmer = PorterStemmer()
+
+tokenizer = nltk.tokenize.RegexpTokenizer(r'\w+')
+stop_words = set(stopwords.words('english'))
 
 for key, value in movieContent.items():
     movie_index_link.append(key)
+
     for item in value:
-        if item not in dictionary.keys():
-            dictionary[item] = 1
-        else:
-            dictionary[item] += 1
+        tokens = tokenizer.tokenize(item.lower())
+        filtered_token = [w for w in tokens if w not in stop_words]
+
+        for token in filtered_token:
+            if stemmer.stem(lemmatizer.lemmatize(token)) not in dictionary.keys():
+                dictionary[stemmer.stem(lemmatizer.lemmatize(token))] = 1
+            else:
+                dictionary[stemmer.stem(lemmatizer.lemmatize(token))] += 1
 
 dictionary = collections.OrderedDict(sorted(dictionary.items()))
 
@@ -57,11 +69,12 @@ except FileNotFoundError as e:
 
 # **** AutoEncoder ****
 ae = AutoEncoder(item_information_matrix, validation_perc=0.1, lr=1e-3, intermediate_size=5000, encoded_size=100)
-ae.train_loop(epochs=30)
+ae.train_loop(epochs=15)
 
 losses = pd.DataFrame(data=list(zip(ae.train_losses, ae.val_losses)), columns=['train_loss', 'validation_loss'])
 losses['epoch'] = (losses.index + 1) / 3
 
+# TODO : plot graph
 fig, ax = plt.subplots()
 ax.plot(losses['epoch'], losses['train_loss'])
 ax.plot(losses['epoch'], losses['validation_loss'])
@@ -71,7 +84,8 @@ ax.set_title('autoencoder loss over time')
 ax.legend()
 
 encoded_item_matrix = ae.get_encoded_representations()
-print(encoded_item_matrix.shape())
+np.save('data/encoded_item_information.npy', encoded_item_matrix)
+print(encoded_item_matrix.shape)
 #
 # try:
 #     item_similarity_score = np.load('data/item_similarity_score.npy')

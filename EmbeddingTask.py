@@ -1,7 +1,10 @@
 import torch
 import numpy
+import nltk
 from pytorch_pretrained_bert import BertTokenizer, BertModel, BertForMaskedLM
-
+from nltk.stem import WordNetLemmatizer
+from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
 
 class EmbeddingUtil:
     sentence = ""
@@ -61,7 +64,15 @@ def get_bert_embedding(sentence):
 
 
 def get_bow_embedding(sentence, dictionary):
+    tokenizer = nltk.tokenize.RegexpTokenizer(r'\w+')
+    lemmatizer = WordNetLemmatizer()
+    stemmer = PorterStemmer()
     item_infomation_matrix = numpy.zeros(len(dictionary))
+    stop_words = set(stopwords.words('english'))
+
     for word in sentence:
-        item_infomation_matrix[list(dictionary.keys()).index(word)] = 1
+        tokens = tokenizer.tokenize(word.lower())
+        filtered_token = [w for w in tokens if w not in stop_words]
+        for token in filtered_token:
+            item_infomation_matrix[list(dictionary.keys()).index(stemmer.stem(lemmatizer.lemmatize(token.lower())))] = 1
     return item_infomation_matrix

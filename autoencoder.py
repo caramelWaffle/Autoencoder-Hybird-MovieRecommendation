@@ -54,7 +54,7 @@ class AutoEncoder(object):
         [(self.val, self.train)] = split_by_idx(self.val_idxs, data)
         self.dataset = AETrainingData(self.train)
         self.dataloader = DataLoader(self.dataset, batch_size=64, shuffle=True,
-                                     num_workers=multiprocessing.cpu_count())
+                                     num_workers=0)
         self.val = torch.from_numpy(self.val).\
             type(torch.FloatTensor).cuda()
 
@@ -70,7 +70,7 @@ class AutoEncoder(object):
             self.decoder.parameters(), lr=lr, weight_decay=1e-8)
 
         # instantiate the loss criterion
-        self.criterion = nn.MSELoss(reduction='elementwise_mean')
+        self.criterion = nn.MSELoss(reduction='mean')
 
         self.train_losses = []
         self.val_losses = []
@@ -134,7 +134,7 @@ class AutoEncoder(object):
                     self.val_losses.append(val_loss)
 
     def get_encoded_representations(self):
-        to_encode = torch.from_numpy(self.data.values).type(
+        to_encode = torch.from_numpy(self.data).type(
             torch.FloatTensor).cuda()
         self.reset(train=False)
         encodings = self.encoder(to_encode).cpu().data.numpy()
@@ -158,7 +158,7 @@ class AETrainingData(Dataset):
         Returns a example from the data set as a pytorch tensor.
         """
         # Get example/target pair at idx as numpy arrays
-        x, y = self.x.iloc[idx].values, self.x.iloc[idx].values
+        x, y = self.x[idx], self.x[idx]
 
         # Convert to torch tensor
         x = torch.from_numpy(x).type(torch.FloatTensor)
