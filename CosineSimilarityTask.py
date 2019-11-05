@@ -14,8 +14,16 @@ class CosineSimilarityTask:
 
     def get_similarity_scores(self):
         for i in tqdm(range(len(self.item_information_matrix))):
-            time.sleep(3)
+            # time.sleep()
             for j in range(len(self.item_information_matrix)):
                 self.similarity_matrix[i][j] = cosine_similarity(self.item_information_matrix[i].reshape(1, -1),
                                                                  self.item_information_matrix[j].reshape(1, -1))
+        return self.similarity_matrix
 
+    def get_similarity_by_movie(self, movie_id, dict_link):
+        index = dict_link.get(int(movie_id))
+        target_vector = self.item_information_matrix[index]
+        similarity_score = np.zeros(len(self.item_information_matrix))
+        for i in range(len(self.item_information_matrix)):
+            similarity_score[i] = cosine_similarity(target_vector.reshape(1, -1), self.item_information_matrix[i].reshape(1, -1))
+        return similarity_score
