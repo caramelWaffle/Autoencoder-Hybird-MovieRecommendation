@@ -4,15 +4,19 @@ from DataManager import DataManager
 from EmbeddingTask import EmbeddingUtil
 from CosineSimilarityTask import CosineSimilarityTask
 from autoencoder import AutoEncoder
+from RatingManager import RatingManager
 
 print("Read File")
 data_manager = DataManager()
+rating_manager = RatingManager()
 movies = data_manager.get_movies()
 tags = data_manager.get_tags()
 
 movieContent = data_manager.get_movie_content()  # key = movieId, value = content
 dictionary = data_manager.get_dictionary()
 movie_dict_link = data_manager.get_movie_dict_link()  # key = movieId, value = index
+
+# userPreference = rating_manager.get_ratings_from_user(user_id=1, indicate_rating_score=4)
 
 try:
     print("Embedding content")
@@ -43,7 +47,7 @@ except FileNotFoundError:
     np.save('data/encoded_item_information.npy', encoded_item_matrix)
 
 print("Calculating similarity score")
-targetMovieId = 1
+targetMovieId = 102125
 cosine_similarity = CosineSimilarityTask(encoded_item_matrix)
 movie_similarity = cosine_similarity.get_similarity_by_movie(targetMovieId, movie_dict_link)
 
@@ -55,4 +59,4 @@ for movieId, value in movie_dict_link.items():
 
 similar_dataframe = pd.DataFrame({'Title': list(movie_name_column.values()), 'Similarity score': movie_similarity, 'Content': list(movie_content_column.values())})
 similar_dataframe = similar_dataframe.sort_values('Similarity score', ascending=False)
-similar_dataframe.to_csv('data/toy_story_similarity_encoded')
+similar_dataframe.to_csv(f'data/{movie_name_column[targetMovieId]}_similarity_encoded')

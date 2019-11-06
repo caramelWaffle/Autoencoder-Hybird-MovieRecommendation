@@ -1,9 +1,25 @@
 import pandas as pd
 import collections
+import re
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.stem import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
+
+
+def get_year(title):
+    try:
+        year = int(title.strip()[-5:-1])
+    except ValueError as e:
+        year = 0
+    return year
+
+
+def get_decades(year):
+    if year == 0:
+        return ''
+    else:
+        return f'{year}s' if int(year) % 10 == 0 else f'{int(year) - (int(year) % 10)}s'
 
 
 class DataManager:
@@ -22,7 +38,10 @@ class DataManager:
     def generate_movies_content(self):
         for index, row in self.movies.iterrows():
             self.movie_dict_link[row['movieId']] = index
-            self.movie_content[row['movieId']] = row['genres'].split("|")
+            content = row['genres'].split("|")
+            content.append(get_year(row['title']))
+            content.append(get_decades(get_year(row['title'])))
+            self.movie_content[row['movieId']] = content
         for index, row in self.tags.iterrows():
             movie_content_ = self.movie_content[row['movieId']]
             movie_content_.append(row['tag'])
@@ -37,7 +56,7 @@ class DataManager:
 
         for index, value in self.movie_content.items():
             for item in value:
-                tokens = tokenizer.tokenize(item.lower())
+                tokens = tokenizer.tokenize(str(item).lower())
                 filtered_token = [w for w in tokens if w not in stop_words]
 
                 for token in filtered_token:
@@ -74,3 +93,9 @@ class DataManager:
 
     def list_to_string(self, list_item):
         return ' '.join(map(str, list_item)).lower()
+
+    def set_movie(self, movies):
+        self.movies = movies
+
+
+
