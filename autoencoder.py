@@ -179,7 +179,8 @@ class Encoder(nn.Module):
             nn.Linear(intermediate_size, encoding_size),
             nn.BatchNorm1d(encoding_size),
             nn.ReLU(True),
-            nn.Dropout(0.2))
+            nn.Dropout(0.2)
+        )
 
     def forward(self, x):
         x = self.encoder(x)
