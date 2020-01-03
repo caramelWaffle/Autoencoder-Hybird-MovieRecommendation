@@ -1,11 +1,11 @@
 import pandas as pd
 import collections
-import re
+from tqdm import tqdm
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.stem import PorterStemmer
 from nltk.tokenize import RegexpTokenizer
-
+from nltk.tokenize import TweetTokenizer
 
 def get_year(title):
     try:
@@ -22,7 +22,10 @@ def get_decades(year):
         return f'{year}s' if int(year) % 10 == 0 else f'{int(year) - (int(year) % 10)}s'
 
 
-class DataManager:
+def token_text(text):
+    return TweetTokenizer().tokenize(text)
+
+class data_manager:
     movies = pd.DataFrame()
     rating = pd.DataFrame()
     tags = pd.DataFrame()
@@ -35,14 +38,24 @@ class DataManager:
         self.ratings = pd.read_csv("data/ratings.csv", encoding='utf-8')
         self.tags = pd.read_csv("data/tags.csv", encoding='utf-8')
 
+    def generate_movies_content_by_id(self, movie_id):
+        movie = self.movies.loc[self.movies['movieId'] == movie_id]
+        content = movie.iloc[0]['genres'].split("|")
+        content.extend(movie.iloc[0]['title'].split(" ")[0:-1])
+        return content
+
     def generate_movies_content(self):
-        for index, row in self.movies.iterrows():
+        print("\nLoading movie contents")
+        for index, row in tqdm(self.movies.iterrows(), total=self.movies.shape[0]):
+            content = []
             self.movie_dict_link[row['movieId']] = index
-            content = row['genres'].split("|")
-            content.append(get_year(row['title']))
-            content.append(get_decades(get_year(row['title'])))
+            content.append(row['movieId'])
+            content.extend(row['genres'].split("|"))
+            content.extend(row['title'].split(" ")[0:-1])
             self.movie_content[row['movieId']] = content
-        for index, row in self.tags.iterrows():
+
+        print("\nLoading movie tags")
+        for index, row in tqdm(self.tags.iterrows(), total=self.tags.shape[0]):
             movie_content_ = self.movie_content[row['movieId']]
             movie_content_.append(row['tag'])
             self.movie_content[row['movieId']] = movie_content_
@@ -54,8 +67,11 @@ class DataManager:
         tokenizer = RegexpTokenizer(r'\w+')
         stop_words = set(stopwords.words('english'))
 
-        for index, value in self.movie_content.items():
-            for item in value:
+        print("\nGenerating Movie Dictionary")
+        for index, value in tqdm(self.movie_content.items()):
+            movieId = value[0]
+            value.remove(movieId)
+            for item in set(value):
                 tokens = tokenizer.tokenize(str(item).lower())
                 filtered_token = [w for w in tokens if w not in stop_words]
 
@@ -64,6 +80,12 @@ class DataManager:
                         self.dictionary[stemmer.stem(lemmatizer.lemmatize(token))] = 1
                     else:
                         self.dictionary[stemmer.stem(lemmatizer.lemmatize(token))] += 1
+
+            decade = get_decades(get_year(self.get_title_by_id(movieId)))
+            if decade not in self.dictionary.keys():
+                self.dictionary[decade] = 1
+            else:
+                self.dictionary[decade] += 1
 
         self.dictionary = collections.OrderedDict(sorted(self.dictionary.items()))
         return self.dictionary
@@ -88,14 +110,23 @@ class DataManager:
             self.generate_movies_content()
         return self.movie_dict_link
 
-    def get_title_by_id(self, movieId):
-        return self.movies.iloc[self.movie_dict_link.get(movieId)].title
-
     def list_to_string(self, list_item):
         return ' '.join(map(str, list_item)).lower()
 
     def set_movie(self, movies):
         self.movies = movies
+
+    def get_title_by_id(self, movieId):
+        return self.movies.loc[(self.movies['movieId'] == movieId)]['title'].values[0]
+
+    def get_content_by_id(self, movieId):
+        return self.generate_movies_content_by_id(self, movieId)
+
+    def get_year_by_title(self, title):
+        return get_year(title)
+
+    def get_decades_by_title(self, title):
+        return get_decades(get_year(title))
 
 
 
