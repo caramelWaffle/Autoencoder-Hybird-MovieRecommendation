@@ -46,7 +46,7 @@ def split_by_idx(idxs, *a):
 class AutoEncoder(object):
 
     def __init__(self, data, validation_perc=0.2, lr=0.001,
-                 intermediate_size=1000, encoded_size=100):
+                 intermediate_size=1000, encoded_size=100, is_enable_bath_norm=True):
 
         # create training dataloader and validation tensor
         self.data = data
@@ -60,8 +60,8 @@ class AutoEncoder(object):
 
         # instantiate the encoder and decoder nets
         size = data.shape[1]
-        self.encoder = Encoder(size, intermediate_size, encoded_size).cuda()
-        self.decoder = Decoder(size, intermediate_size, encoded_size).cuda()
+        self.encoder = Encoder(size, intermediate_size, encoded_size, is_enable_bath_norm).cuda()
+        self.decoder = Decoder(size, intermediate_size, encoded_size, is_enable_bath_norm).cuda()
 
         # instantiate the optimizers
         self.encoder_optimizer = optim.Adam(
@@ -169,18 +169,26 @@ class AETrainingData(Dataset):
 
 
 class Encoder(nn.Module):
-    def __init__(self, input_size, intermediate_size, encoding_size):
+    def __init__(self, input_size, intermediate_size, encoding_size, is_enable_bath_norm):
         super().__init__()
-        self.encoder = nn.Sequential(
-            nn.Linear(input_size, intermediate_size),
-            nn.BatchNorm1d(intermediate_size),
-            nn.ReLU(True),
-            nn.Dropout(0.2),
-            nn.Linear(intermediate_size, encoding_size),
-            nn.BatchNorm1d(encoding_size),
-            nn.ReLU(True),
-            nn.Dropout(0.2)
-        )
+        if is_enable_bath_norm:
+            self.encoder = nn.Sequential(
+                nn.Linear(input_size, intermediate_size),
+                nn.BatchNorm1d(intermediate_size),
+                nn.ReLU(True),
+                nn.Dropout(0.2),
+                nn.Linear(intermediate_size, encoding_size),
+                nn.BatchNorm1d(encoding_size),
+                nn.ReLU(True),
+                nn.Dropout(0.2))
+        else:
+            self.encoder = nn.Sequential(
+                nn.Linear(input_size, intermediate_size),
+                nn.ReLU(True),
+                nn.Dropout(0.2),
+                nn.Linear(intermediate_size, encoding_size),
+                nn.ReLU(True),
+                nn.Dropout(0.2))
 
     def forward(self, x):
         x = self.encoder(x)
@@ -188,16 +196,24 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, output_size, intermediate_size, encoding_size):
+    def __init__(self, output_size, intermediate_size, encoding_size, is_enable_bath_norm):
         super().__init__()
-        self.decoder = nn.Sequential(
-            nn.Linear(encoding_size, intermediate_size),
-            nn.BatchNorm1d(intermediate_size),
-            nn.ReLU(True),
-            nn.Dropout(0.2),
-            nn.Linear(intermediate_size, output_size),
-            nn.BatchNorm1d(output_size),
-            nn.Sigmoid())
+        if is_enable_bath_norm:
+            self.decoder = nn.Sequential(
+                nn.Linear(encoding_size, intermediate_size),
+                nn.BatchNorm1d(intermediate_size),
+                nn.ReLU(True),
+                nn.Dropout(0.2),
+                nn.Linear(intermediate_size, output_size),
+                nn.BatchNorm1d(output_size),
+                nn.Sigmoid())
+        else:
+            self.decoder = nn.Sequential(
+                nn.Linear(encoding_size, intermediate_size),
+                nn.ReLU(True),
+                nn.Dropout(0.2),
+                nn.Linear(intermediate_size, output_size),
+                nn.Sigmoid())
 
     def forward(self, x):
         x = self.decoder(x)

@@ -30,7 +30,7 @@ class similarity_helper:
         return similarity_score
 
     def get_movie_by_preferences(self, user_preference):
-        similarity_score = np.zeros((len(self.item_information_matrix), 1))
+        similarity_score = np.zeros(len(self.item_information_matrix))
         for i in range(len(self.item_information_matrix)):
             similarity_score[i] = cosine_similarity(user_preference, self.item_information_matrix[i].reshape(1, -1))
         return similarity_score

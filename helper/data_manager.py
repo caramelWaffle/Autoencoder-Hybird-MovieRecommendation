@@ -45,7 +45,7 @@ class data_manager:
         return content
 
     def generate_movies_content(self):
-        print("\nLoading movie contents")
+        print("\nGenerate movie contents")
         for index, row in tqdm(self.movies.iterrows(), total=self.movies.shape[0]):
             content = []
             self.movie_dict_link[row['movieId']] = index
@@ -54,7 +54,7 @@ class data_manager:
             content.extend(row['title'].split(" ")[0:-1])
             self.movie_content[row['movieId']] = content
 
-        print("\nLoading movie tags")
+        print("\nGenerate movie tags")
         for index, row in tqdm(self.tags.iterrows(), total=self.tags.shape[0]):
             movie_content_ = self.movie_content[row['movieId']]
             movie_content_.append(row['tag'])
@@ -68,6 +68,7 @@ class data_manager:
         stop_words = set(stopwords.words('english'))
 
         print("\nGenerating Movie Dictionary")
+
         for index, value in tqdm(self.movie_content.items()):
             movieId = value[0]
             value.remove(movieId)
@@ -120,7 +121,7 @@ class data_manager:
         return self.movies.loc[(self.movies['movieId'] == movieId)]['title'].values[0]
 
     def get_content_by_id(self, movieId):
-        return self.generate_movies_content_by_id(self, movieId)
+        return self.generate_movies_content_by_id(movieId)
 
     def get_year_by_title(self, title):
         return get_year(title)
