@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import pickle
 import multiprocessing
+import os
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
@@ -55,7 +56,7 @@ class AutoEncoder(object):
         self.dataset = AETrainingData(self.train)
         self.dataloader = DataLoader(self.dataset, batch_size=64, shuffle=True,
                                      num_workers=0)
-        self.val = torch.from_numpy(self.val).\
+        self.val = torch.from_numpy(self.val). \
             type(torch.FloatTensor).cuda()
 
         # instantiate the encoder and decoder nets
@@ -96,12 +97,14 @@ class AutoEncoder(object):
 
         # Return the loss value to track training progress
         return loss.item()
-    
+
     def reset(self, train=True):
         # due to dropout the network behaves differently in training and
         # evaluation modes
-        if train: self.encoder.train(); self.decoder.train()
-        else: self.encoder.eval(); self.decoder.eval()
+        if train:
+            self.encoder.train(); self.decoder.train()
+        else:
+            self.encoder.eval(); self.decoder.eval()
 
     def get_val_loss(self, input_tensor, target_tensor):
         self.reset(train=False)
@@ -118,7 +121,7 @@ class AutoEncoder(object):
 
             # Cycle through batches
             for i, batch in enumerate(self.dataloader):
-                
+
                 self.reset(train=True)
 
                 input_tensor = batch['input'].cuda()
@@ -139,6 +142,19 @@ class AutoEncoder(object):
         self.reset(train=False)
         encodings = self.encoder(to_encode).cpu().data.numpy()
         return encodings
+
+    def save_encoder(self):
+
+        torch.save(self.encoder.state_dict(), 'checkpoint/encoder_checkpoint.pt')
+
+    def save_decoder(self):
+        torch.save(self.decoder.state_dict(), 'checkpoint/decoder_checkpoint.pt')
+
+    def load_encoder(self):
+        self.encoder.load_state_dict(torch.load('checkpoint/encoder_checkpoint.pt'), strict=False)
+
+    def load_decoder(self):
+        self.encoder.load_state_dict(torch.load('checkpoint/decoder_checkpoint.pt'), strict=False)
 
 
 class AETrainingData(Dataset):
@@ -185,10 +201,9 @@ class Encoder(nn.Module):
             self.encoder = nn.Sequential(
                 nn.Linear(input_size, intermediate_size),
                 nn.ReLU(True),
-                nn.Dropout(0.2),
                 nn.Linear(intermediate_size, encoding_size),
                 nn.ReLU(True),
-                nn.Dropout(0.2))
+            )
 
     def forward(self, x):
         x = self.encoder(x)
@@ -211,7 +226,6 @@ class Decoder(nn.Module):
             self.decoder = nn.Sequential(
                 nn.Linear(encoding_size, intermediate_size),
                 nn.ReLU(True),
-                nn.Dropout(0.2),
                 nn.Linear(intermediate_size, output_size),
                 nn.Sigmoid())
 

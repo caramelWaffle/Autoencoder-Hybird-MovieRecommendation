@@ -11,6 +11,7 @@ from operator import itemgetter
 import collections
 import pandas as pd
 import numpy as np
+import json
 
 class user_perferences:
     data_manager = None
@@ -44,6 +45,9 @@ class user_perferences:
         if is_gen_csv:
             csv_helper().write_csv("output", f"user_{user_id}_liked_movies", user_movie_df)
 
+        json_data = json.dumps(dict(content_freq), indent=4)
+        with open('output/user-preference.json', 'w') as outfile:
+            json.dump(json_data, outfile, indent=4)
         # TODO: Chang to 5
         user_perferences_dic = {x: content_freq[x] for x in content_freq if content_freq[x] >= 1}
         return collections.OrderedDict(sorted(user_perferences_dic.items(), key=itemgetter(1), reverse=True))
