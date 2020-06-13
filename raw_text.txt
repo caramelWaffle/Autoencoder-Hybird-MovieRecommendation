@@ -1,0 +1,76 @@
+Iteration: 32010 ; error = 80.5059;
+Iteration: 32020 ; error = 67.4676;
+Iteration: 32030 ; error = 58.9605;
+Iteration: 32040 ; error = 52.8913;
+Iteration: 32050 ; error = 48.3410;
+Iteration: 32060 ; error = 44.8081;
+Iteration: 32070 ; error = 41.9911;
+Iteration: 32080 ; error = 39.6973;
+Iteration: 32090 ; error = 37.7981;
+Iteration: 32100 ; error = 36.2044;
+Save P and Q step 32100  as /checkpoint
+Iteration: 32110 ; error = 34.8521;
+Iteration: 32120 ; error = 33.6941;
+Iteration: 32130 ; error = 32.6946;
+Iteration: 32140 ; error = 31.8262;
+Iteration: 32150 ; error = 31.0672;
+Iteration: 32160 ; error = 30.4003;
+Iteration: 32170 ; error = 29.8116;
+Iteration: 32180 ; error = 29.2898;
+Iteration: 32190 ; error = 28.8255;
+Iteration: 32200 ; error = 28.4109;
+Save P and Q step 32200  as /checkpoint
+Iteration: 32210 ; error = 28.0393;
+Iteration: 32220 ; error = 27.7054;
+Iteration: 32230 ; error = 27.4044;
+Iteration: 32240 ; error = 27.1323;
+Iteration: 32250 ; error = 26.8856;
+Iteration: 32260 ; error = 26.6616;
+Iteration: 32270 ; error = 26.4578;
+Iteration: 32280 ; error = 26.2715;
+Iteration: 32290 ; error = 26.1012;
+Iteration: 32300 ; error = 25.9452;
+Save P and Q step 32300  as /checkpoint
+Iteration: 32310 ; error = 25.8020;
+Iteration: 32320 ; error = 25.6703;
+Iteration: 32330 ; error = 25.5489;
+Iteration: 32340 ; error = 25.4368;
+Iteration: 32350 ; error = 25.3332;
+Iteration: 32360 ; error = 25.2373;
+Iteration: 32370 ; error = 25.1483;
+Iteration: 32380 ; error = 25.0657;
+Iteration: 32390 ; error = 24.9889;
+Iteration: 32400 ; error = 24.9174;
+Save P and Q step 32400  as /checkpoint
+Iteration: 32410 ; error = 24.8507;
+Iteration: 32420 ; error = 24.7884;
+Iteration: 32430 ; error = 24.7303;
+Iteration: 32440 ; error = 24.6758;
+Iteration: 32450 ; error = 24.6248;
+Iteration: 32460 ; error = 24.5771;
+Iteration: 32470 ; error = 24.5322;
+Iteration: 32480 ; error = 24.4900;
+Iteration: 32490 ; error = 24.4504;
+Iteration: 32500 ; error = 24.4131;
+Save P and Q step 32500  as /checkpoint
+Iteration: 32510 ; error = 24.3778;
+Iteration: 32520 ; error = 24.3448;
+Iteration: 32530 ; error = 24.3133;
+Iteration: 32540 ; error = 24.2839;
+Iteration: 32550 ; error = 24.2559;
+Iteration: 32560 ; error = 24.2295;
+Iteration: 32570 ; error = 24.2044;
+Iteration: 32580 ; error = 24.1807;
+Iteration: 32590 ; error = 24.1581;
+Iteration: 32600 ; error = 24.1369;
+Save P and Q step 32600  as /checkpoint
+Iteration: 32610 ; error = 24.1166;
+Iteration: 32620 ; error = 24.0974;
+Iteration: 32630 ; error = 24.0792;
+Iteration: 32640 ; error = 24.0618;
+Iteration: 32650 ; error = 24.0452;
+Iteration: 32660 ; error = 24.0294;
+Iteration: 32670 ; error = 24.0144;
+Iteration: 32680 ; error = 24.0001;
+Iteration: 32690 ; error = 23.9865;
+Iteration: 32700 ; error = 23.9734;

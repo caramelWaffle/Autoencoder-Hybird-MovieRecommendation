@@ -1,12 +1,11 @@
 import pandas as pd
 import numpy as np
-from helper.data_manager import data_manager
-from helper.embedding import embedding_helper
-from helper.similarity_helper import similarity_helper
-from user_preferences import user_perferences
-from autoencoder import AutoEncoder
-from helper.rating_manager import rating_helper
-from helper.csv_helper import csv_helper
+from model.data_manager import data_manager
+from model.embedding import embedding_helper
+from model.similarity_helper import similarity_helper
+from model.user_preferences import user_perferences
+from model.autoencoder import AutoEncoder
+from model.csv_helper import csv_helper
 from tqdm import tqdm
 import argparse
 import os
@@ -55,7 +54,7 @@ if encoded_movie_path:
     print(os.path.abspath(encoded_movie_path))
     encoded_movie_contents = np.load(os.path.abspath(encoded_movie_path))
 else:
-    ae = AutoEncoder(embedded_movie_contents, validation_perc=0.1, lr=1e-3, intermediate_size=5000, encoded_size=100)
+    ae = AutoEncoder(embedded_movie_contents, validation_perc=0.1, lr=1e-3, intermediate_size=5000, encoded_size=100, is_enable_bath_norm=True)
     ae.train_loop(epochs=15)
     encoded_movie_contents = ae.get_encoded_representations()
     ae.save_encoder()
@@ -80,13 +79,10 @@ if target_movie_id != 0:
 
     filter_decade = True
 
-    similar_dataframe = pd.DataFrame(
-        {'movie_id': list(movie_name_column.keys()), 'title': list(movie_name_column.values()),
-         'content': list(movie_content_column.values()), 'similarity_score': movie_similarity})
+    similar_dataframe = pd.DataFrame({'movie_id': list(movie_name_column.keys()), 'title': list(movie_name_column.values()), 'content': list(movie_content_column.values()), 'similarity_score': movie_similarity})
     similar_dataframe = similar_dataframe[similar_dataframe['title'] != data_manager.get_title_by_id(target_movie_id)]
     if filter_decade:
-        temp = similar_dataframe[similar_dataframe['content'].str.contains(
-            data_manager.get_decades_by_title(data_manager.get_title_by_id(target_movie_id)))]
+        temp = similar_dataframe[similar_dataframe['content'].str.contains(data_manager.get_decades_by_title(data_manager.get_title_by_id(target_movie_id)))]
         if temp.shape[0] > 100:
             similar_dataframe = temp
     similar_dataframe = similar_dataframe.sort_values('similarity_score', ascending=False)
@@ -103,15 +99,14 @@ if user_id != 0:
     else:
         embedded_user_preference_vector = np.zeros((1, len(dictionary)))
         embedded_user_preference_vector = embedding_helper(user_perferences.keys(), model="bow",
-                                                           dictionary=dictionary).get_embedding()
+                                                  dictionary=dictionary).get_embedding()
         np.save(f'data/user_preference_vector.npy', embedded_user_preference_vector)
 
         print("\nEncoding user content")
-        ae = AutoEncoder(embedded_user_preference_vector, validation_perc=0.1, lr=1e-3, intermediate_size=5000,
-                         encoded_size=100, is_enable_bath_norm=False)
+        ae = AutoEncoder(embedded_user_preference_vector, validation_perc=0.1, lr=1e-3, intermediate_size=5000, encoded_size=100, is_enable_bath_norm=False)
         ae.load_encoder()
         ae.load_decoder()
-
+        
         encoded_user_preference_vector = ae.get_encoded_representations()
         np.save("data/encoded_user_contents", encoded_user_preference_vector)
 
